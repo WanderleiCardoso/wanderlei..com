@@ -1,0 +1,160 @@
+<html>
+    <head>
+
+        <title>YESHUA</title>
+    </head>
+
+    <body>
+    
+
+        <h1>TESTE SITE WANDER</h1>
+        <img src="">
+    </body>
+
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Futebol da Semana</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script>
+        let jogadores = JSON.parse(localStorage.getItem('jogadores')) || [];
+        let ausentes = JSON.parse(localStorage.getItem('ausentes')) || [];
+        let goleiros = jogadores.filter(j => j.posicao === 'Goleiro').length;
+    
+        const SENHA = 'admin123'; // Altere para a senha desejada
+    
+        function pedirSenha(callback) {
+          const senha = prompt('Digite a senha para adicionar ou excluir jogadores:');
+          if (senha === SENHA) {
+            callback();
+          } else {
+            alert('Senha incorreta.');
+          }
+        }
+    
+        function adicionarJogador() {
+          pedirSenha(() => {
+            const nomeInput = document.getElementById('nome');
+            const posicaoInput = document.getElementById('posicao');
+            const nome = nomeInput.value.trim();
+            const posicao = posicaoInput.value;
+    
+            if (!nome || !posicao) return alert('Preencha todos os campos!');
+    
+            if (jogadores.length >= 15) return alert('Limite de jogadores atingido!');
+            if (posicao === 'Goleiro' && goleiros >= 2) return alert('Limite de goleiros atingido!');
+    
+            jogadores.push({ nome, posicao });
+            if (posicao === 'Goleiro') goleiros++;
+    
+            localStorage.setItem('jogadores', JSON.stringify(jogadores));
+    
+            nomeInput.value = '';
+            posicaoInput.selectedIndex = 0;
+    
+            atualizarLista();
+          });
+        }
+    
+        function adicionarAusente() {
+          const nomeInput = document.getElementById('nome');
+          const nome = nomeInput.value.trim();
+          if (!nome) return alert('Digite seu nome!');
+          ausentes.push(nome);
+          localStorage.setItem('ausentes', JSON.stringify(ausentes));
+          nomeInput.value = '';
+          atualizarLista();
+        }
+    
+        function excluirJogador(index) {
+          pedirSenha(() => {
+            jogadores.splice(index, 1);
+            localStorage.setItem('jogadores', JSON.stringify(jogadores));
+            atualizarLista();
+          });
+        }
+    
+        function atualizarLista() {
+          const lista = document.getElementById('lista-jogadores');
+          lista.innerHTML = '';
+          jogadores.forEach((jogador, index) => {
+            const item = document.createElement('li');
+            item.className = 'border-b border-gray-300 py-2 flex justify-between items-center';
+            item.textContent = `${index + 1}. ${jogador.nome} - ${jogador.posicao}`;
+            const btnExcluir = document.createElement('button');
+            btnExcluir.innerHTML = '❌'; // Ícone de excluir
+            btnExcluir.className = 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded';
+            btnExcluir.onclick = () => excluirJogador(index);
+            item.appendChild(btnExcluir);
+            lista.appendChild(item);
+          });
+    
+          const listaAusentes = document.getElementById('lista-ausentes');
+          listaAusentes.innerHTML = '';
+          ausentes.forEach((nome, index) => {
+            const item = document.createElement('li');
+            item.className = 'border-b border-gray-300 py-1 text-red-600';
+            item.textContent = `${index + 1}. ${nome}`;
+            listaAusentes.appendChild(item);
+          });
+        }
+    
+        window.onload = atualizarLista;
+      </script>
+    </head>
+    <body class="bg-green-100 font-sans">
+      <!-- Cabeçalho -->
+      <header class="bg-green-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+          <h1 class="text-2xl font-bold">Futebol da Semana</h1>
+          <nav>
+            <a href="#inscricao" class="hover:underline">Inscreva-se</a>
+          </nav>
+        </div>
+      </header>
+    
+      <!-- Hero -->
+      <section class="text-center py-20 bg-green-500 text-white">
+        <h2 class="text-4xl font-bold mb-4">Quer jogar bola com a galera?</h2>
+        <p class="text-lg">Inscreva-se para o Futebol da Semana e garanta sua vaga no time!</p>
+        <a href="#inscricao" class="mt-6 inline-block bg-white text-green-600 font-semibold px-6 py-3 rounded-full hover:bg-gray-100">Adicionar Nome</a>
+      </section>
+    
+      <!-- Lista de Jogadores -->
+      <section id="inscricao" class="py-16 px-6 max-w-xl mx-auto">
+        <h3 class="text-3xl font-semibold text-center mb-8">Lista de Jogadores</h3>
+        <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+          <input id="nome" type="text" placeholder="Nome do jogador" class="w-full p-3 border border-gray-300 rounded">
+          <select id="posicao" class="w-full p-3 border border-gray-300 rounded">
+            <option disabled selected>Escolha a posição</option>
+            <option>Goleiro</option>
+            <option>Zagueiro</option>
+            <option>Lateral</option>
+            <option>Meio-campo</option>
+            <option>Atacante</option>
+          </select>
+          <div class="grid grid-cols-2 gap-4">
+            <button onclick="adicionarJogador()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded w-full">Essa semana eu vou</button>
+            <button onclick="adicionarAusente()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded w-full">Dessa vez eu não vou</button>
+          </div>
+          <ul id="lista-jogadores" class="mt-6 text-gray-800"></ul>
+          <h4 class="text-xl mt-8 font-semibold text-red-600">Quem não vai:</h4>
+          <ul id="lista-ausentes" class="mt-2 text-gray-600"></ul>
+        </div>
+      </section>
+    
+      <!-- Contato via WhatsApp -->
+      <section class="text-center py-10">
+        <p class="text-lg">Dúvidas? Fale comigo pelo WhatsApp:</p>
+        <a href="https://wa.me/5531993963023" target="_blank" class="inline-block mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full">📲 Enviar mensagem</a>
+      </section>
+    
+      <!-- Rodapé -->
+      <footer class="text-center py-6 text-gray-600">
+        © 2025 Futebol da Semana. Todos os direitos reservados.
+      </footer>
+    </body>
+    </html>
+    
